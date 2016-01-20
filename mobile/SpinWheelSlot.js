@@ -486,17 +486,22 @@ define([
 
 		resize: function(e){
 			// Correct internal variables & adjust slot panels
-			var items = this.panelNodes[1].childNodes;
-			// TODO investigate - the position is calculated incorrectly for 
-			// windows theme, disable this logic for now.
-			if(items.length > 0 && !has("windows-theme")){ // empty slot?
-				this._itemHeight = items[0].offsetHeight;
-				this.centerPos = this.getParent().centerPos;
-				if(!this.panelNodes[0].style.top){
-					// #17339: to avoid messing up the layout of the panels, call adjust()
-					// only if it didn't manage yet to set the style.top (this happens 
-					// typically because the slot was initially	 hidden). 
-					this.adjust();
+			if(this.panelNodes && this.panelNodes.length > 0){
+				var items = this.panelNodes[1].childNodes;
+				// TODO investigate - the position is calculated incorrectly for
+				// windows theme, disable this logic for now.
+				if(items.length > 0 && !has("windows-theme")){ // empty slot?
+					var parent = this.getParent();
+					if(parent){ // #18012: null in same cases on IE8/9 
+						this._itemHeight = items[0].offsetHeight;
+						this.centerPos = parent.centerPos;
+						if(!this.panelNodes[0].style.top){
+							// (#17339) to avoid messing up the layout of the panels, call adjust()
+							// only if it didn't manage yet to set the style.top (this happens
+							// typically because the slot was initially	 hidden).
+							this.adjust();
+						}
+					}
 				}
 			}
 			if(this._pendingValue){

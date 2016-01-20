@@ -89,8 +89,10 @@ define([
 		},
 
 		onInput: function(e){
-			this._onKey(e);
-			this.inherited(arguments);
+			if(!e || e.charCode !== 0){ // #18047
+				this._onKey(e);
+				this.inherited(arguments);
+			}
 		},
 
 		_setListAttr: function(v){
@@ -116,18 +118,7 @@ define([
 			this.inherited(arguments);
 			domAttr.remove(this.domNode, "aria-owns");
 			domAttr.set(this.domNode, "aria-expanded", "false");
-			
-			var bgIframe = this.dropDown ? this.dropDown.bgIframe : undefined;
-			// Avoid failure in dijit/popup.close().
-			// (Same trick as in _ComboBoxMenu.destroyRendering().)
-			this.dropDown.bgIframe = false;
-			
 			popup.close(this.dropDown);
-			
-			if(this.dropDown){
-				this.dropDown.bgIframe = bgIframe; // restore
-			}
-			
 			this._opened = false;
 
 			// Remove disable attribute to make input element clickable after context menu closed
@@ -160,7 +151,7 @@ define([
 				domAttr.set(this.domNode, "aria-owns", dropDown.id);
 			}
 
-			if(has('touch')){
+			if(has("touch") && (!has("ios") || has("ios") < 8)){
 				win.global.scrollBy(0, domGeometry.position(aroundNode, false).y); // don't call scrollIntoView since it messes up ScrollableView
 			}
 
@@ -275,7 +266,7 @@ define([
 						active = isGesture = false; // click implies no gesture movement
 					}
 				);
-				this.endHandler = this.connect(win.doc.documentElement, "onmouseup",//touch.release,
+				this.endHandler = this.connect(win.doc.documentElement, touch.release,
 					function(){
 						this.defer(function(){ // allow onclick to go first
 							skipReposition = true;
